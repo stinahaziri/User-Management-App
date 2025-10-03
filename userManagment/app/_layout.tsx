@@ -4,6 +4,8 @@ import { StatusBar } from 'expo-status-bar';
 // import 'react-native-reanimated';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { UserProvider } from "@/app/UserContext";
+
 
 //IMPORTAT TON
 import { Appearance } from 'react-native';//PER LIGHT OSE DARK THEME
@@ -17,16 +19,16 @@ export default function RootLayout() {
   const colorScheme = Appearance.getColorScheme();
   const  theme=colorScheme=="dark"? Colors.dark : Colors.light; 
 
-
   return (
     <SafeAreaProvider>
-      <Stack screenOptions={{headerStyle:{backgroundColor:theme.headerBackground},headerTintColor:theme.text,headerShadowVisible:false}}>
-
-        <Stack.Screen name="index" options={{ title:"Home" ,headerShown:false}}/>
-        <Stack.Screen name="AddUser" options={{ title:"AddUser"}}/>
-        <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-      </Stack>
-      </SafeAreaProvider>
-   
+      <UserProvider>
+        <Stack screenOptions={{headerStyle:{backgroundColor:theme.headerBackground},headerTintColor:theme.text,headerShadowVisible:false}}>
+          <Stack.Screen name="index" options={{ title:"Home" ,headerShown:false}}/>
+          <Stack.Screen name="AddUser" options={{ title:"AddUser"}}/>
+          <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
+          <Stack.Screen name="UserContext" options={{ title: 'UserContext' }} />
+        </Stack>
+      </UserProvider>
+    </SafeAreaProvider>
   );
 }

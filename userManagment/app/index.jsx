@@ -6,29 +6,71 @@ import {
   Image,
   FlatList,
   Platform,
+  ActivityIndicatorBase,
 } from "react-native";
-import { Link, TextInput } from "expo-router";
+import { Link} from "expo-router";
+import { TextInput,ActivityIndicator } from "react-native";
 import { FontAwesome5 } from "@expo/vector-icons";
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-
+import{filter} from "lodash.filter";
 import profilee from "@/assets/images/profile.jpg";
-const theApp = () => {
-  //magjia Api
-   const [data, setData] = useState([]);
+import { UserContext } from "@/app/UserContext";
 
-   //data fetch 
-  const getApiData = async () => {
-    const url = "https://jsonplaceholder.typicode.com/users";
-    let result = await fetch(url);
-    result = await result.json();
-    setData(result);
-  };
+const theApp = () => {
+  const { user } = useContext(UserContext);
+  const [isLoading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [searchQuery, setQuery] = useState("");
+
+  const [apiUsers, setApiUsers] = useState([]);
+  const [allApiUsers, setAllApiUsers] = useState([]); // kopje origjinale
 
   useEffect(() => {
-    getApiData();
+    setLoading(true);
+    fetch("https://jsonplaceholder.typicode.com/users")
+      .then(res => res.json())
+      .then(data => {
+        setApiUsers(data);
+        setAllApiUsers(data);
+        setLoading(false);
+      });
   }, []);
 
+  const contains = (user, query) => {
+    return (
+      user.name.toLowerCase().includes(query) ||
+      user.email.toLowerCase().includes(query) ||
+      (user.company?.name?.toLowerCase().includes(query) ?? false)
+    );
+  };
+
+  const handleSearch = (query) => {
+    setQuery(query);
+    const formattedQuery = query.toLowerCase();
+
+    // filtro user-at lokalë
+    const filteredLocal = user.filter(u => contains(u, formattedQuery));
+    // filtro user-at nga API
+    const filteredApi = allApiUsers.filter(u => contains(u, formattedQuery));
+
+    setApiUsers(filteredApi);
+    setFilteredLocalUsers(filteredLocal);
+  };
+
+  const [filteredLocalUsers, setFilteredLocalUsers] = useState([]);
+
+  const data = searchQuery
+    ? [...filteredLocalUsers, ...apiUsers]
+    : [...user, ...allApiUsers];
+
+  if(isLoading){
+    return(
+      <View style={{flex:1,justifyContent:"center",alignItems:"center"}}>
+      <ActivityIndicator size={"large"} color="#5500dc"/>
+      </View>
+    )
+  }
   return (
     // <SafeAreaView>   
      <View style={styles.container}>
@@ -48,11 +90,22 @@ const theApp = () => {
         {/* fundi ti linkut */}
       </View>
       {/* fundi ti header */}
-
+      
+<View>
+  <TextInput
+   style={styles.search}
+    placeholder="Search.."
+    placeholderTextColor="#888"
+    clearButtonMode="always"
+    autoCapitalize="none"
+    autoCorrect={false}
+    value={searchQuery}
+    onChangeText={handleSearch}
+    />
+</View>
       <View>
         <FlatList
           data={data}
-          
           keyExtractor={(item) => item.id.toString()}
           renderItem={({ item }) => (
             <View style={styles.containerList}>
@@ -75,7 +128,7 @@ const theApp = () => {
         />
       </View>
     </View>
-    
+     
 
   );
 };
@@ -87,7 +140,8 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: "column",
     backgroundColor: "#F2F2F2",
-    alignItems: "center",
+    // alignItems: "center",
+    marginBottom:230
   },
   header: {
     flexDirection: "row",
@@ -119,6 +173,16 @@ const styles = StyleSheet.create({
     fontSize: 19,
     
   },
+  search:{
+height:50,
+width:"80%",
+ borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    color: "#000",
+    alignSelf: "center",
+  },
 
   // stilizimi per kta listat
   containerList: {
@@ -131,7 +195,7 @@ const styles = StyleSheet.create({
     marginBottom: 30,
     alignItems: "center",
     marginTop: 30,
-flexDirection: "row",
+    flexDirection: "row",
     justifyContent: "space-around",
     alignContent: "center",
     alignSelf: "center",
