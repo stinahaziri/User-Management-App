@@ -20,7 +20,11 @@ export default function AddUser() {
       alert("Name and email are required!");
       return;
     }
-
+ const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    alert("Please enter a valid email address!");
+    return;
+  }
     const newUser = {
       id: Date.now(),
       name,
@@ -56,6 +60,8 @@ export default function AddUser() {
           style={styles.inputet}
           placeholder="Enter Your Email..."
           placeholderTextColor="#888"
+           keyboardType="email-address" 
+            autoComplete="email"
         />
       </View>
 

@@ -20,7 +20,7 @@ import { useRouter } from "expo-router";
 
 const theApp = () => {
   const router = useRouter();
-  const { user } = useContext(UserContext);
+  const { user,setUser } = useContext(UserContext);
   const [isLoading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [searchQuery, setQuery] = useState("");
@@ -39,6 +39,9 @@ const theApp = () => {
       });
   }, []);
 
+  const handleDeleter=(id)=>{
+    setUser((prev)=>prev.filter((u)=>u.id !==id))
+  }
   const contains = (user, query) => {
     return (
       user.name.toLowerCase().includes(query) ||
@@ -105,34 +108,46 @@ const theApp = () => {
     />
 </View>
       <View>
-       <FlatList
+<FlatList
   data={data}
   keyExtractor={(item) => item.id.toString()}
   renderItem={({ item }) => (
-    <Pressable
-      onPress={() => router.push({
-        pathname: "/user/" + item.id,
-        params: { 
-          id: item.id,
-          name: item.name,
-          email: item.email,
-          company: item.company?.name 
+    <View style={styles.containerList}>
+   
+      <Pressable
+        style={{ flexDirection: "row", flex: 1 }}
+        onPress={() =>
+          router.push({
+            pathname: "/user/" + item.id,
+            params: {
+              id: item.id,
+              name: item.name,
+              email: item.email,
+              company: item.company?.name,
+            },
+          })
         }
-      })}
-    >
-      <View style={styles.containerList}>
+      >
         <Image source={profilee} style={styles.image} />
-        <View>
+        <View style={{ marginLeft: 10 }}>
           <Text style={{ fontWeight: "bold" }}>{item.name}</Text>
           <Text>{item.email}</Text>
           <Text>{item.company?.name}</Text>
         </View>
-      </View>
-    </Pressable>
+      </Pressable>
+
+     
+      <Pressable name="plus"
+        style={styles.deleteBtn}
+        onPress={() => handleDeleter(item.id)}
+      >
+        
+        <FontAwesome5 style={styles.trashIcona} name="trash" />
+      </Pressable>
+    </View>
   )}
 />
-
-      </View>
+      </View>    
     </View>
      
 
@@ -177,7 +192,6 @@ const styles = StyleSheet.create({
   plusIcona: {
     color: "#448CDA",
     fontSize: 19,
-    
   },
   search:{
 height:50,
@@ -205,6 +219,11 @@ width:"80%",
     justifyContent: "space-around",
     alignContent: "center",
     alignSelf: "center",
+       shadowColor: "#000",
+  shadowOffset: { width: 0, height: 6 },
+  shadowOpacity: 0.25,
+  shadowRadius: 3.84,
+    
 
   },
   image: {
@@ -212,4 +231,24 @@ width:"80%",
     height: 100, 
    borderRadius: 25
   },
+ 
+  trashIcona: {
+    color: "#feffffff",
+    fontSize: 16,
+  },
+  deleteBtn:{
+    
+    alignSelf:"flex-end",
+    borderWidth:2,
+     borderColor: "#feffffff",
+      paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius:4,
+    backgroundColor:"#D53B3A",
+    shadowColor: "#000",
+  shadowOffset: { width: 5, height: 6 },
+  shadowOpacity: 0.25,
+  shadowRadius: 3.84,
+    
+  }
 });
