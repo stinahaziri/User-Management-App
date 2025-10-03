@@ -9,15 +9,17 @@ import {
   ActivityIndicatorBase,
 } from "react-native";
 import { Link} from "expo-router";
-import { TextInput,ActivityIndicator } from "react-native";
+import { TextInput,ActivityIndicator,router } from "react-native";
 import { FontAwesome5 } from "@expo/vector-icons";
 import React, { useContext, useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import{filter} from "lodash.filter";
 import profilee from "@/assets/images/profile.jpg";
 import { UserContext } from "@/app/UserContext";
+import { useRouter } from "expo-router";
 
 const theApp = () => {
+  const router = useRouter();
   const { user } = useContext(UserContext);
   const [isLoading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -49,9 +51,8 @@ const theApp = () => {
     setQuery(query);
     const formattedQuery = query.toLowerCase();
 
-    // filtro user-at lokalë
     const filteredLocal = user.filter(u => contains(u, formattedQuery));
-    // filtro user-at nga API
+    
     const filteredApi = allApiUsers.filter(u => contains(u, formattedQuery));
 
     setApiUsers(filteredApi);
@@ -104,28 +105,33 @@ const theApp = () => {
     />
 </View>
       <View>
-        <FlatList
-          data={data}
-          keyExtractor={(item) => item.id.toString()}
-          renderItem={({ item }) => (
-            <View style={styles.containerList}>
+       <FlatList
+  data={data}
+  keyExtractor={(item) => item.id.toString()}
+  renderItem={({ item }) => (
+    <Pressable
+      onPress={() => router.push({
+        pathname: "/user/" + item.id,
+        params: { 
+          id: item.id,
+          name: item.name,
+          email: item.email,
+          company: item.company?.name 
+        }
+      })}
+    >
+      <View style={styles.containerList}>
+        <Image source={profilee} style={styles.image} />
+        <View>
+          <Text style={{ fontWeight: "bold" }}>{item.name}</Text>
+          <Text>{item.email}</Text>
+          <Text>{item.company?.name}</Text>
+        </View>
+      </View>
+    </Pressable>
+  )}
+/>
 
-              <View>
-                <Image
-                  source={profilee}
-                  style={styles.image}
-                />
-              </View>
-
-              <View>
-              <Text style={{ fontWeight: "bold" }}>{item.name}</Text>
-              <Text>{item.email}</Text>
-              <Text>{item.company?.name}</Text>
-              
-              </View>
-            </View>
-          )}
-        />
       </View>
     </View>
      
